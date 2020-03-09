@@ -36,6 +36,8 @@ else
     # Try to guess from suffix
   SUFFIX: {
       $commentStart = '//', last SUFFIX if $suffix =~ /[CH]$/;
+      $commentStart = '//', last SUFFIX if $suffix =~ /hpp$/;
+      $commentStart = '//', last SUFFIX if $suffix =~ /cpp$/;
       $commentStart = '/*', $commentEnd = '*/', $commentBlock = '**', last SUFFIX if $suffix =~ /[ch]$/;
       # Default
       $commentStart = $commentEnd = $commentBlock = "#";
