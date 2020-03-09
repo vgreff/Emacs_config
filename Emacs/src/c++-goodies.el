@@ -160,8 +160,8 @@
   (interactive)
   (beginning-of-buffer)
   (let ((cmd "addHdr "))
-    ;; (if comment-start
-    ;;     (setq cmd (concat cmd "-c \"" comment-start " " comment-end "\" ")))
+    (if comment-start
+        (setq cmd (concat cmd "-c \"" comment-start " " comment-end "\" ")))
     (shell-command (concat cmd (buffer-file-name)) t )
     (if (featurep 'hilit19)
         (hilit-rehighlight-buffer-quietly))))
