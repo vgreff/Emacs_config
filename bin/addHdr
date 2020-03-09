@@ -2,7 +2,15 @@
 #
 eval 'exec perl -S $0 ${1+"$@"}'
 	if 1 == 2;
+use Getopt::Long;
 
+
+#
+# -c : comment syntax (format is start end)
+#
+my $opt_c;
+GetOptions('comment|c=s' => \$opt_c)
+    or die("Error in command line arguments\n");
 
 #
 # Get the root and suffix of the file
@@ -18,14 +26,20 @@ if ($#ARGV == 0)
     $suffix = $root unless $suffix;
 }
     
-# Try to guess from suffix
- SUFFIX: {
-     $commentStart = '//', last SUFFIX if $suffix =~ /[CH]$/;
-     $commentStart = '//', last SUFFIX if $suffix =~ /hpp$/;
-     $commentStart = '//', last SUFFIX if $suffix =~ /cpp$/;
-     #$commentStart = '/*', $commentEnd = '*/', $commentBlock = '**', last SUFFIX if $suffix =~ /[ch]$/;
-     # Default
-     $commentStart = $commentEnd = $commentBlock = "#";
+if ($opt_c)
+{
+    $commentBlock = "**";
+    ($commentStart, $commentEnd) = split(/[ \t]+/,$opt_c);
+}
+else
+{
+    # Try to guess from suffix
+  SUFFIX: {
+      $commentStart = '//', last SUFFIX if $suffix =~ /[CH]$/;
+      $commentStart = '/*', $commentEnd = '*/', $commentBlock = '**', last SUFFIX if $suffix =~ /[ch]$/;
+      # Default
+      $commentStart = $commentEnd = $commentBlock = "#";
+  }
 }
 
 
@@ -43,7 +57,40 @@ $year = 1900 + $tm[5];
 $date = "$months[$tm[4]] $tm[3], $year";
 
 # Find out who the author is
-$author = $ENV{'NAME'} || (getpwuid($>))[6];
+if ($^O =~ /MSWin32/)
+{
+    $author = $ENV{USERNAME};
+}
+else
+{
+    $author = $ENV{'NAME'} || (getpwuid($>))[6];
+}
+
+# Determine if we should use PVCS, RCS or SCCS.
+if (-f "$ENV{PVCS}/master.cfg") {
+	#
+	# We must be using PVCS
+	#
+	$versionKeyword = "\$Revision\$";
+	$dateKeyword = "\$Date\$"; 
+	$vcMagic = "@(#)\$Workfile\$\t\$Revision\$\t\$Modtime\$";
+	$vcAuthor = "by \$Author\$";
+	$vcFileName = "\$Archive\$";
+} elsif (-d "./RCS") {
+    $versionKeyword = "\$Revision\$";
+    $dateKeyword = "\$Date\$"; 
+    $vcMagic = "\$Id\$";
+    $vcAuthor = "by \$Author\$";
+    $vcFileName = "\$Source\$";
+}
+else
+{
+    # Assume SCCS unless there's an RCS directory.
+    $versionKeyword = '%I%';
+    $dateKeyword = '%G% %U%';
+    $vcMagic = '%W%	%E% %U%';
+    $vcFileName = '%P%';
+}
 
 
 print "$commentStart\n";
@@ -65,8 +112,15 @@ if (-r $templateFile)
 	print eval qq/"$_"/;
     }
 }
-#// Copyright ${year} by ${author}
+#// Copyright ${year} Vincent B. Greff
 __END__
-// Copyright ${year} by Vincent B. Greff
+// HISTORY FILE: ${vcFileName}
+//
+// VERSION: ${versionKeyword}
 //    
-// CREATED: ${date} 
+// CREATED: ${date} by ${author}
+//
+// LAST CHANGED: ${dateKeyword} ${vcAuthor}
+//
+// AUTHOR: Vincent B. Greff
+//
