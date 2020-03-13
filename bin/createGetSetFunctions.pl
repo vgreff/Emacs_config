@@ -7,7 +7,7 @@ $k=2;
 while(<>)
 {
     @line =split(/[ \t]+/,$_); 
-    if ($#line == 2)
+    #if ($#line == 2)
     {
 	chop($line[2]);		# chop return
     }

@@ -14,7 +14,7 @@ CC= g++
 # The flags that will be used to compile the object file.
 # If you want to debug your program,
 # you can add '-g' on the following line
-CFLAGS= -O2 -std=c++11 -g -Wall -pedantic 
+CFLAGS= -O2 -std=c++11 -g -Wall -pedantic -ggdb3 
 
 # The name of the final executable 
 EXECUTABLE=testprg
