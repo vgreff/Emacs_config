@@ -107,6 +107,15 @@
 
 ;;**************************************************************************
 
+(defun create-snippets()
+  "Generate get set functions to the current buffer. Uses the perl script createGetSetFunctions.pl"
+  (interactive)
+  (let ((cmd "addSnippet "))
+    (shell-command-on-region (mark t) (point) cmd t )))
+
+;;**************************************************************************
+
+(global-set-key "\C-ce" 'create-snippets)
 (global-set-key "\C-cu" 'create-get-set_functions-underscore)
 (global-set-key "\C-cf" 'create-get-set_functions)
 (global-set-key "\C-c_" 'create-get-set_functions-under)
